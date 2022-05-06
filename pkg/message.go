@@ -81,7 +81,9 @@ func decodeDN(data []byte) (string, error) {
 	var n int
 	// Iterate over data.
 	for _, b := range data {
-		if n == 0 {
+		if b == 0 {
+			break
+		} else if n == 0 {
 			n = int(b)
 			sb.WriteString(".")
 		} else {
@@ -107,5 +109,6 @@ func encodeDN(dn string) ([]byte, error) {
 		data = append(data, byte(len(t)))
 		data = append(data, []byte(t)...)
 	}
+	data = append(data, byte(0))
 	return data, nil
 }
