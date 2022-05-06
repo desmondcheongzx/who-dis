@@ -109,3 +109,37 @@ func encodeDN(dn string) ([]byte, error) {
 	}
 	return data, nil
 }
+
+func (hdr *Header) serialize() []byte {
+	buf := make([]byte, 0)
+	buf = append(buf, htons(hdr.id)...)
+	var flags1 uint8 = 0
+	if hdr.qr {
+		flags1 |= 1 << 7
+	}
+	flags1 |= uint8(hdr.opcode << 3)
+	if hdr.aa {
+		flags1 |= 1 << 2
+	}
+	if hdr.tc {
+		flags1 |= 1 << 1
+	}
+	if hdr.rd {
+		flags1 |= 1
+	}
+	buf = append(buf, []byte{flags1}...)
+	var flags2 uint8 = 8
+	if hdr.ra {
+		flags1 |= 1
+	}
+	flags2 |= hdr.rcode
+	buf = append(buf, []byte{flags2}...)
+	buf = append(buf, htons(hdr.qdcount)...)
+	buf = append(buf, htons(hdr.ancount)...)
+	buf = append(buf, htons(hdr.nscount)...)
+	buf = append(buf, htons(hdr.arcount)...)
+	return buf
+}
+
+func (hdr *Header) deserialize(buf []byte) {
+}
