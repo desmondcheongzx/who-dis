@@ -46,6 +46,10 @@ const (
 	Q_MINFO = 14
 	Q_MX    = 15
 	Q_TXT   = 16
+	Q_AXFR = 252 
+	Q_MAILB = 253
+	Q_MAILA = 254
+	Q_TSTAR = 255
 )
 
 type QClass = uint16
@@ -54,4 +58,5 @@ const (
 	Q_CS = 2
 	Q_CH = 3
 	Q_HS = 4
+	Q_CSTAR = 255
 )
