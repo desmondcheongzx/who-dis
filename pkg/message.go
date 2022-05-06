@@ -1,5 +1,7 @@
 package pkg
 
+import "errors"
+
 // +---------------------+
 // |        Header       |
 // +---------------------+
@@ -63,7 +65,46 @@ type ResourceRecord struct {
 	rdata   []byte
 }
 
+func (rr *ResourceRecord) serialize() ([]byte, error) {
+	buf := make([]byte, 0)
+	nData, err := encodeDN(rr.name)
+	if err != nil {
+		return nil, err
+	}
+	buf = append(buf, nData...)
+	buf = append(buf, htons(rr.rrType)...)
+	buf = append(buf, htons(rr.rrType)...)
+	buf = append(buf, htonl(rr.ttl)...)
+	buf = append(buf, htons(rr.rdlen)...)
+	buf = append(buf, rr.rdata...)
+	return buf, nil
+}
 
+func (rr *ResourceRecord) deserialize(data []byte) (int, error) {
+	// Get the qname.
+	name, n, err := decodeDN(data)
+	if err != nil {
+		return -1, err
+	}
+	// If not enough data, error.
+	if len(data) < n + 4 {
+		return -1, errors.New("data malformed; too short")
+	}
+	// Get the qtype and qclass.
+	rrType := ntohs(data[n:n+2])
+	rrClass := ntohs(data[n+2:n+4])
+	ttl := ntohl(data[n+4:n+8])
+	rdlen := ntohs(data[n+8:n+10])
+	rdata := append(make([]byte, 0), data[n+10:n+10+int(rdlen)]...)
+	// Assign and return.
+	rr.name = name
+	rr.rrType = rrType
+	rr.rrClass = rrClass
+	rr.ttl = ttl
+	rr.rdlen = rdlen
+	rr.rdata = rdata
+	return n+10+int(rdlen), nil
+}
 
 type Question struct {
 	qname  string
@@ -71,15 +112,37 @@ type Question struct {
 	qclass QClass
 }
 
-// func decodeQuestion(data []byte) (*Question, n, error) {
-// 	// Get the qname.
-// 	qname, n, err := decodeDN(data)
-// 	if err != nil {
-// 		return nil, -1, err
-// 	}
-// 	// Get the qtype and qclass.
-// 	qtype := QType(data[n:n+2])
-// }
+func (q *Question) serialize() ([]byte, error) {
+	buf := make([]byte, 0)
+	qnData, err := encodeDN(q.qname)
+	if err != nil {
+		return nil, err
+	}
+	buf = append(buf, qnData...)
+	buf = append(buf, htons(q.qtype)...)
+	buf = append(buf, htons(q.qclass)...)
+	return buf, nil
+}
+
+func (q *Question) deserialize(data []byte) (int, error) {
+	// Get the qname.
+	qname, n, err := decodeDN(data)
+	if err != nil {
+		return -1, err
+	}
+	// If not enough data, error.
+	if len(data) < n + 4 {
+		return -1, errors.New("data malformed; too short")
+	}
+	// Get the qtype and qclass.
+	qtype := ntohs(data[n:n+2])
+	qclass := ntohs(data[n+2:n+4])
+	// Assign and return.
+	q.qname = qname
+	q.qtype = qtype
+	q.qclass = qclass
+	return n+4, nil
+}
 
 func (hdr *Header) serialize() []byte {
 	buf := make([]byte, 0)
