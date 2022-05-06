@@ -87,14 +87,14 @@ func (rr *ResourceRecord) deserialize(data []byte) (int, error) {
 		return -1, err
 	}
 	// If not enough data, error.
-	if len(data) < n + 4 {
+	if len(data) < n+4 {
 		return -1, errors.New("data malformed; too short")
 	}
 	// Get the qtype and qclass.
-	rrType := ntohs(data[n:n+2])
-	rrClass := ntohs(data[n+2:n+4])
-	ttl := ntohl(data[n+4:n+8])
-	rdlen := ntohs(data[n+8:n+10])
+	rrType := ntohs(data[n : n+2])
+	rrClass := ntohs(data[n+2 : n+4])
+	ttl := ntohl(data[n+4 : n+8])
+	rdlen := ntohs(data[n+8 : n+10])
 	rdata := append(make([]byte, 0), data[n+10:n+10+int(rdlen)]...)
 	// Assign and return.
 	rr.name = name
@@ -103,7 +103,7 @@ func (rr *ResourceRecord) deserialize(data []byte) (int, error) {
 	rr.ttl = ttl
 	rr.rdlen = rdlen
 	rr.rdata = rdata
-	return n+10+int(rdlen), nil
+	return n + 10 + int(rdlen), nil
 }
 
 type Question struct {
@@ -131,17 +131,17 @@ func (q *Question) deserialize(data []byte) (int, error) {
 		return -1, err
 	}
 	// If not enough data, error.
-	if len(data) < n + 4 {
+	if len(data) < n+4 {
 		return -1, errors.New("data malformed; too short")
 	}
 	// Get the qtype and qclass.
-	qtype := ntohs(data[n:n+2])
-	qclass := ntohs(data[n+2:n+4])
+	qtype := ntohs(data[n : n+2])
+	qclass := ntohs(data[n+2 : n+4])
 	// Assign and return.
 	q.qname = qname
 	q.qtype = qtype
 	q.qclass = qclass
-	return n+4, nil
+	return n + 4, nil
 }
 
 func (hdr *Header) serialize() []byte {
@@ -176,4 +176,18 @@ func (hdr *Header) serialize() []byte {
 }
 
 func (hdr *Header) deserialize(buf []byte) {
+	hdr.id = ntohs(buf[0:2])
+	flags1 := uint8(buf[2])
+	hdr.qr = flags1&(1<<7) != 0
+	hdr.opcode = (flags1 >> 3) & 0b1111
+	hdr.aa = flags1&(1) != 0
+	flags2 := uint8(buf[3])
+	hdr.tc = flags2&(1<<7) != 0
+	hdr.rd = flags2&(1<<6) != 0
+	hdr.ra = flags2&(1<<5) != 0
+	hdr.rcode = flags1 & 0b1111
+	hdr.qdcount = ntohs(buf[4:6])
+	hdr.ancount = ntohs(buf[6:8])
+	hdr.nscount = ntohs(buf[8:10])
+	hdr.arcount = ntohs(buf[10:12])
 }
