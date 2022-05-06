@@ -1,10 +1,5 @@
 package pkg
 
-import (
-	"errors"
-	"strings"
-)
-
 // +---------------------+
 // |        Header       |
 // +---------------------+
@@ -68,50 +63,23 @@ type ResourceRecord struct {
 	rdata   []byte
 }
 
+
+
 type Question struct {
 	qname  string
 	qtype  QType
 	qclass QClass
 }
 
-// Function to parse variable-length domain names from bytes.
-func decodeDN(data []byte) (string, error) {
-	// Initialize.
-	var sb strings.Builder
-	var n int
-	// Iterate over data.
-	for _, b := range data {
-		if b == 0 {
-			break
-		} else if n == 0 {
-			n = int(b)
-			sb.WriteString(".")
-		} else {
-			n = n - 1
-			sb.WriteByte(b)
-		}
-	}
-	// If n isn't 0, data was malformed; else return.
-	if n != 0 || len(sb.String()) == 0 {
-		return "", errors.New("domain name data malformed")
-	}
-	return sb.String()[1:], nil
-}
-
-// Function to encode a domain name as bytes.
-func encodeDN(dn string) ([]byte, error) {
-	// Split toks, append in specified manner.
-	data, toks := make([]byte, 0), strings.Split(dn, ".")
-	for _, t := range toks {
-		if len(t) == 0 {
-			return nil, errors.New("domain name malformed")
-		}
-		data = append(data, byte(len(t)))
-		data = append(data, []byte(t)...)
-	}
-	data = append(data, byte(0))
-	return data, nil
-}
+// func decodeQuestion(data []byte) (*Question, n, error) {
+// 	// Get the qname.
+// 	qname, n, err := decodeDN(data)
+// 	if err != nil {
+// 		return nil, -1, err
+// 	}
+// 	// Get the qtype and qclass.
+// 	qtype := QType(data[n:n+2])
+// }
 
 func (hdr *Header) serialize() []byte {
 	buf := make([]byte, 0)
