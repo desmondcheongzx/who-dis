@@ -74,8 +74,8 @@ func encodeDomainName(dn string) ([]byte, error) {
 
 func decodeCharString(data []byte) (string, int, error) {
 	n := int(data[0])
-	s := string(data[1:n+1])
-	return s, n+1, nil
+	s := string(data[1 : n+1])
+	return s, n + 1, nil
 }
 
 func encodeCharString(cs string) ([]byte, error) {
