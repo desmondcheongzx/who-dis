@@ -33,7 +33,7 @@ func ntohl(data []byte) uint32 {
 }
 
 // Function to parse variable-length domain names from bytes.
-func decodeDN(data []byte) (string, int, error) {
+func decodeDomainName(data []byte) (string, int, error) {
 	// Initialize.
 	var sb strings.Builder
 	var n int
@@ -58,7 +58,7 @@ func decodeDN(data []byte) (string, int, error) {
 }
 
 // Function to encode a domain name as bytes.
-func encodeDN(dn string) ([]byte, error) {
+func encodeDomainName(dn string) ([]byte, error) {
 	// Split toks, append in specified manner.
 	data, toks := make([]byte, 0), strings.Split(dn, ".")
 	for _, t := range toks {
@@ -70,4 +70,14 @@ func encodeDN(dn string) ([]byte, error) {
 	}
 	data = append(data, byte(0))
 	return data, nil
+}
+
+func decodeCharString(data []byte) (string, int, error) {
+	n := int(data[0])
+	s := string(data[1:n+1])
+	return s, n+1, nil
+}
+
+func encodeCharString(cs string) ([]byte, error) {
+	return append([]byte{byte(len(cs))}, []byte(cs)...), nil
 }
