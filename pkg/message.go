@@ -40,6 +40,60 @@ type Message struct {
 	additionals []ResourceRecord
 }
 
+func newQuery(questions []Question, answers []ResourceRecord, authorities []ResourceRecord, additionals []ResourceRecord) *Message {
+	header := Header{
+		id:      genRandomID(),
+		qr:      false, // Query
+		opcode:  0,     // Standard query
+		rd:      true,  // Recursion desired
+		qdcount: uint16(len(questions)),
+		ancount: uint16(len(answers)),
+		nscount: uint16(len(authorities)),
+		arcount: uint16(len(additionals)),
+	}
+	return &Message{
+		header:      header,
+		questions:   questions,
+		answers:     answers,
+		authorities: authorities,
+		additionals: additionals,
+	}
+}
+
+func (msg *Message) serialize() ([]byte, error) {
+	buf := make([]byte, 0)
+	buf = append(buf, msg.header.serialize()...)
+	for _, q := range msg.questions {
+		qbuf, err := q.serialize()
+		if err != nil {
+			return nil, err
+		}
+		buf = append(buf, qbuf...)
+	}
+	for _, anws := range msg.answers {
+		abuf, err := anws.serialize()
+		if err != nil {
+			return nil, err
+		}
+		buf = append(buf, abuf...)
+	}
+	for _, auths := range msg.authorities {
+		abuf, err := auths.serialize()
+		if err != nil {
+			return nil, err
+		}
+		buf = append(buf, abuf...)
+	}
+	for _, adds := range msg.additionals {
+		abuf, err := adds.serialize()
+		if err != nil {
+			return nil, err
+		}
+		buf = append(buf, abuf...)
+	}
+	return buf, nil
+}
+
 type Header struct {
 	id     uint16
 	qr     bool  // query or response

@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/binary"
 	"errors"
+	"math/rand"
 	"strings"
 )
 
@@ -80,4 +81,9 @@ func decodeCharString(data []byte) (string, int, error) {
 
 func encodeCharString(cs string) ([]byte, error) {
 	return append([]byte{byte(len(cs))}, []byte(cs)...), nil
+}
+
+func genRandomID() uint16 {
+	num := rand.Int31()
+	return uint16(num)
 }

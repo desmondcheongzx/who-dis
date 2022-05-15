@@ -2,8 +2,17 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	dns "github.com/desmondcheongzx/who-dis/pkg"
 )
 
 func main() {
-	fmt.Println("Hello, world!")
+	if len(os.Args) < 2 {
+		fmt.Println("usage: ./who-dis <domain name>")
+		return
+	}
+	dn := os.Args[1]
+	client := dns.NewDNSClient()
+	client.Query(dn)
 }
