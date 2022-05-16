@@ -52,8 +52,10 @@ func decodeDomainName(data []byte, idx int, maxlen int) (string, int, error) {
 			pos := ntohs(data[i : i+2])
 			pos ^= 0b11 << 14
 			i = int(pos)
+			if !jumped {
+				length += 2
+			}
 			jumped = true
-			length += 2
 			goto ptrjump
 		}
 		// Handle label
