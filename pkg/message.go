@@ -189,7 +189,7 @@ func (rr *ResourceRecord) deserialize(data []byte, idx int, maxlen int) (int, er
 		return -1, err
 	}
 	// If not enough data, error.
-	if len(data) < idx+n+4 {
+	if len(data) < idx+n+10 {
 		return -1, errors.New("data malformed; too short")
 	}
 	// Get the qtype and qclass.
@@ -197,6 +197,9 @@ func (rr *ResourceRecord) deserialize(data []byte, idx int, maxlen int) (int, er
 	rrClass := ntohs(data[idx+n+2 : idx+n+4])
 	ttl := ntohl(data[idx+n+4 : idx+n+8])
 	rdlen := ntohs(data[idx+n+8 : idx+n+10])
+	if len(data) < idx+n+10+int(rdlen) {
+		return -1, errors.New("data malformed; too short")
+	}
 	rdata := append(make([]byte, 0), data[idx+n+10:idx+n+10+int(rdlen)]...)
 	// Assign and return.
 	rr.name = name
