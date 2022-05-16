@@ -14,10 +14,8 @@ func main() {
 	}
 	dn := os.Args[1]
 	client := dns.NewDNSClient()
-	ip, err := client.Query(dn)
+	err := client.Query(dn)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
-	fmt.Println(ip.String())
 }

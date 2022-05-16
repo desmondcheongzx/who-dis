@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"log"
 	"net"
 )
@@ -15,15 +16,14 @@ func NewDNSClient() *DNSClient {
 	}
 }
 
-func (client *DNSClient) Query(dn string) (net.IP, error) {
-	alias := dn
+func (client *DNSClient) Query(dn string) error {
 	addr, err := net.ResolveUDPAddr("udp", "8.8.8.8:53")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	conn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer conn.Close()
 	question := Question{
@@ -34,52 +34,48 @@ func (client *DNSClient) Query(dn string) (net.IP, error) {
 	message := newQuery([]Question{question}, nil, nil, nil)
 	payload, err := message.serialize()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err = conn.Write(payload); err != nil {
-		return nil, err
+		return err
 	}
 	buf := make([]byte, 65535)
 	bytesRead, err := conn.Read(buf)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	replyHdr := &Header{}
 	startidx := 12 // End of header
 	replyHdr.deserialize(buf[:startidx])
+	fmt.Println(";; QUESTION SECTION:")
 	for i := 0; i < int(replyHdr.qdcount); i++ {
 		q := &Question{}
 		n, err := q.deserialize(buf, startidx, bytesRead)
 		if err != nil {
-			return nil, err
+			return err
 		}
+		fmt.Printf("%v\t\t\tIN\tA\n", q.qname)
 		startidx += n
 	}
-	answers := make([]*ResourceRecord, 0)
+	fmt.Println()
+	fmt.Println(";; ANSWER SECTION:")
 	for i := 0; i < int(replyHdr.ancount); i++ {
 		rr := &ResourceRecord{}
 		n, err := rr.deserialize(buf, startidx, bytesRead)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		startidx += n
 		if rr.rrType == RR_CNAME {
-			newAlias, _, err := decodeDomainName(buf, startidx-len(rr.rdata), bytesRead)
+			alias, _, err := decodeDomainName(buf, startidx-len(rr.rdata), bytesRead)
 			if err != nil {
 				log.Println(err)
 			}
-			alias = newAlias
-		}
-		if rr.name == alias {
-			return net.IP(rr.rdata), nil
-		}
-		answers = append(answers, rr)
-	}
-	for _, rr := range answers {
-		if rr.name == alias {
-			return net.IP(rr.rdata), nil
+			fmt.Printf("%v\t\t%v\tIN\tCNAME\t%v\n", rr.name, rr.ttl, alias)
+		} else {
+			fmt.Printf("%v\t\t%v\tIN\tA\t%v\n", rr.name, rr.ttl, net.IP(rr.rdata))
 		}
 	}
-	return nil, nil
+	return nil
 }
