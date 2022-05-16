@@ -39,7 +39,7 @@ func (client *DNSClient) Query(dn string) error {
 	if _, err = conn.Write(payload); err != nil {
 		return err
 	}
-	buf := make([]byte, 65535)
+	buf := make([]byte, 512)
 	bytesRead, err := conn.Read(buf)
 	if err != nil {
 		return err
