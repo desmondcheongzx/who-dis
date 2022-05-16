@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"net"
 )
 
@@ -44,6 +43,27 @@ func (client *DNSClient) Query(dn string) (net.IP, error) {
 		return nil, err
 	}
 
-	fmt.Printf("%v\n", string(buf[:bytesRead]))
+	replyHdr := &Header{}
+	startidx := 12 // End of header
+	replyHdr.deserialize(buf[:startidx])
+	for i := 0; i < int(replyHdr.qdcount); i++ {
+		q := &Question{}
+		n, err := q.deserialize(buf, startidx, bytesRead)
+		if err != nil {
+			return nil, err
+		}
+		startidx += n
+	}
+	for i := 0; i < int(replyHdr.ancount); i++ {
+		rr := &ResourceRecord{}
+		n, err := rr.deserialize(buf, startidx, bytesRead)
+		if err != nil {
+			return nil, err
+		}
+		startidx += n
+		if rr.name == dn {
+			return net.IP(rr.rdata), nil
+		}
+	}
 	return nil, nil
 }
