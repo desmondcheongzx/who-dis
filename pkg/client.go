@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"log"
 	"net"
 )
 
@@ -15,6 +16,7 @@ func NewDNSClient() *DNSClient {
 }
 
 func (client *DNSClient) Query(dn string) (net.IP, error) {
+	alias := dn
 	addr, err := net.ResolveUDPAddr("udp", "8.8.8.8:53")
 	if err != nil {
 		return nil, err
@@ -54,6 +56,7 @@ func (client *DNSClient) Query(dn string) (net.IP, error) {
 		}
 		startidx += n
 	}
+	answers := make([]*ResourceRecord, 0)
 	for i := 0; i < int(replyHdr.ancount); i++ {
 		rr := &ResourceRecord{}
 		n, err := rr.deserialize(buf, startidx, bytesRead)
@@ -61,7 +64,20 @@ func (client *DNSClient) Query(dn string) (net.IP, error) {
 			return nil, err
 		}
 		startidx += n
-		if rr.name == dn {
+		if rr.rrType == RR_CNAME {
+			newAlias, _, err := decodeDomainName(buf, startidx-len(rr.rdata), bytesRead)
+			if err != nil {
+				log.Println(err)
+			}
+			alias = newAlias
+		}
+		if rr.name == alias {
+			return net.IP(rr.rdata), nil
+		}
+		answers = append(answers, rr)
+	}
+	for _, rr := range answers {
+		if rr.name == alias {
 			return net.IP(rr.rdata), nil
 		}
 	}
