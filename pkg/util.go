@@ -34,12 +34,32 @@ func ntohl(data []byte) uint32 {
 }
 
 // Function to parse variable-length domain names from bytes.
-func decodeDomainName(data []byte) (string, int, error) {
+func decodeDomainName(data []byte, idx int, maxlen int) (string, int, error) {
 	// Initialize.
 	var sb strings.Builder
 	var n int
+	length := 0
+	jumped := false
 	// Iterate over data.
-	for _, b := range data {
+	for i := idx; i < maxlen; i++ {
+	ptrjump:
+		b := data[i]
+		// Handle pointer
+		if n == 0 && (b&(0b11<<6) != 0) {
+			if maxlen <= i+1 {
+				return "", -1, errors.New("domain name data malformed")
+			}
+			pos := ntohs(data[i : i+2])
+			pos ^= 0b11 << 14
+			i = int(pos)
+			jumped = true
+			length += 2
+			goto ptrjump
+		}
+		// Handle label
+		if !jumped {
+			length++
+		}
 		if b == 0 {
 			break
 		} else if n == 0 {
@@ -50,12 +70,12 @@ func decodeDomainName(data []byte) (string, int, error) {
 			sb.WriteByte(b)
 		}
 	}
-	// If n isn't 0, data was malformed; else return.
+	// If domain name does not have a single dot, data was malformed
 	dn := sb.String()
-	if n != 0 || len(dn) == 0 {
+	if len(dn) == 0 {
 		return "", -1, errors.New("domain name data malformed")
 	}
-	return dn[1:], len(dn), nil
+	return dn[1:], length, nil
 }
 
 // Function to encode a domain name as bytes.

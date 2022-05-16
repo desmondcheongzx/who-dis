@@ -182,22 +182,22 @@ func (rr *ResourceRecord) serialize() ([]byte, error) {
 	return buf, nil
 }
 
-func (rr *ResourceRecord) deserialize(data []byte) (int, error) {
+func (rr *ResourceRecord) deserialize(data []byte, idx int, maxlen int) (int, error) {
 	// Get the qname.
-	name, n, err := decodeDomainName(data)
+	name, n, err := decodeDomainName(data, idx, maxlen)
 	if err != nil {
 		return -1, err
 	}
 	// If not enough data, error.
-	if len(data) < n+4 {
+	if len(data) < idx+n+4 {
 		return -1, errors.New("data malformed; too short")
 	}
 	// Get the qtype and qclass.
-	rrType := ntohs(data[n : n+2])
-	rrClass := ntohs(data[n+2 : n+4])
-	ttl := ntohl(data[n+4 : n+8])
-	rdlen := ntohs(data[n+8 : n+10])
-	rdata := append(make([]byte, 0), data[n+10:n+10+int(rdlen)]...)
+	rrType := ntohs(data[idx+n : idx+n+2])
+	rrClass := ntohs(data[idx+n+2 : idx+n+4])
+	ttl := ntohl(data[idx+n+4 : idx+n+8])
+	rdlen := ntohs(data[idx+n+8 : idx+n+10])
+	rdata := append(make([]byte, 0), data[idx+n+10:idx+n+10+int(rdlen)]...)
 	// Assign and return.
 	rr.name = name
 	rr.rrType = rrType
@@ -226,9 +226,9 @@ func (q *Question) serialize() ([]byte, error) {
 	return buf, nil
 }
 
-func (q *Question) deserialize(data []byte) (int, error) {
+func (q *Question) deserialize(data []byte, idx int, maxlen int) (int, error) {
 	// Get the qname.
-	qname, n, err := decodeDomainName(data)
+	qname, n, err := decodeDomainName(data, idx, maxlen)
 	if err != nil {
 		return -1, err
 	}
@@ -237,8 +237,8 @@ func (q *Question) deserialize(data []byte) (int, error) {
 		return -1, errors.New("data malformed; too short")
 	}
 	// Get the qtype and qclass.
-	qtype := ntohs(data[n : n+2])
-	qclass := ntohs(data[n+2 : n+4])
+	qtype := ntohs(data[idx+n : idx+n+2])
+	qclass := ntohs(data[idx+n+2 : idx+n+4])
 	// Assign and return.
 	q.qname = qname
 	q.qtype = qtype
