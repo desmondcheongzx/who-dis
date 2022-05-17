@@ -14,7 +14,7 @@ func main() {
 	}
 	dn := os.Args[1]
 	client := dns.NewDNSClient()
-	err := client.Query(dn)
+	err := client.Query(dn, true)
 	if err != nil {
 		fmt.Println(err)
 	}
