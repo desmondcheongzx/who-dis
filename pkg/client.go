@@ -27,7 +27,7 @@ func (client *DNSClient) recursiveQuery(dn string, ns string, useCaching bool) e
 		for i := 0; i < len(toks); i++ {
 			dnfrag := strings.Join(toks[i:], ".")
 			rr, cacheHit := client.cache.Get(dnfrag)
-			if cacheHit && rr.timestamp + rr.ttl >= uint32(time.Now().Unix()) {
+			if cacheHit && rr.timestamp+rr.ttl >= uint32(time.Now().Unix()) {
 				fmt.Println("### Cached response ###")
 				fmt.Printf("%s\t%s\n", dnfrag, rr.addr.String())
 				if i == 0 {

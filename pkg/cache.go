@@ -9,15 +9,15 @@ import (
 
 type CachedRecord struct {
 	timestamp uint32 // unix epoch time in seconds
-	ttl uint32
-	addr net.IP
+	ttl       uint32
+	addr      net.IP
 }
 
 func NewCachedRecord(rr *ResourceRecord) *CachedRecord {
 	return &CachedRecord{
 		timestamp: uint32(time.Now().Unix()),
-		ttl: rr.ttl,
-		addr: net.IP(rr.rdata),
+		ttl:       rr.ttl,
+		addr:      net.IP(rr.rdata),
 	}
 }
 
