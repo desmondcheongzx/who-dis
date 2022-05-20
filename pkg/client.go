@@ -110,7 +110,11 @@ func (client *DNSClient) recursiveQuery(dn string, ns string, useCaching bool) e
 			}
 			fmt.Printf("%v\t\t%v\tIN\tCNAME\t%v\n", rr.name, rr.ttl, alias)
 		} else {
-			fmt.Printf("%v\t\t%v\tIN\tA\t%v\n", rr.name, rr.ttl, net.IP(rr.rdata))
+			rrtype := "A"
+			if rr.rrType == 28 {
+				rrtype = "AAAA"
+			}
+			fmt.Printf("%v\t\t%v\tIN\t%s\t%v\n", rr.name, rr.ttl, rrtype, net.IP(rr.rdata))
 		}
 	}
 
@@ -149,7 +153,11 @@ func (client *DNSClient) recursiveQuery(dn string, ns string, useCaching bool) e
 		}
 		startidx += n
 		servers = append(servers, rr)
-		fmt.Printf("%v\t\t%v\tIN\tA\t%v\n", rr.name, rr.ttl, net.IP(rr.rdata))
+		rrtype := "A"
+		if rr.rrType == 28 {
+			rrtype = "AAAA"
+		}
+		fmt.Printf("%v\t\t%v\tIN\t%s\t%v\n", rr.name, rr.ttl, rrtype, net.IP(rr.rdata))
 	}
 
 	// Cache answers.

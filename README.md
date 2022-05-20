@@ -48,19 +48,19 @@ www.brown.edu			IN	A
 ;; ANSWER SECTION:
 
 ;; AUTHORITY SECTION:
-edu		172800	IN	NS	c.edu-servers.net
-edu		172800	IN	NS	i.edu-servers.net
-edu		172800	IN	NS	m.edu-servers.net
 edu		172800	IN	NS	b.edu-servers.net
+edu		172800	IN	NS	h.edu-servers.net
+edu		172800	IN	NS	i.edu-servers.net
 edu		172800	IN	NS	d.edu-servers.net
+edu		172800	IN	NS	k.edu-servers.net
 edu		172800	IN	NS	a.edu-servers.net
 edu		172800	IN	NS	e.edu-servers.net
-edu		172800	IN	NS	g.edu-servers.net
-edu		172800	IN	NS	h.edu-servers.net
 edu		172800	IN	NS	f.edu-servers.net
+edu		172800	IN	NS	c.edu-servers.net
 edu		172800	IN	NS	l.edu-servers.net
+edu		172800	IN	NS	g.edu-servers.net
 edu		172800	IN	NS	j.edu-servers.net
-edu		172800	IN	NS	k.edu-servers.net
+edu		172800	IN	NS	m.edu-servers.net
 
 ;; ADDITIONAL SECTION:
 m.edu-servers.net		172800	IN	A	192.55.83.30
@@ -76,7 +76,7 @@ d.edu-servers.net		172800	IN	A	192.31.80.30
 c.edu-servers.net		172800	IN	A	192.26.92.30
 b.edu-servers.net		172800	IN	A	192.33.14.30
 a.edu-servers.net		172800	IN	A	192.5.6.30
-m.edu-servers.net		172800	IN	A	2001:501:b1f9::30
+m.edu-servers.net		172800	IN	AAAA	2001:501:b1f9::30
 
 ### Response from 192.55.83.30 ###
 ;; QUESTION SECTION:
@@ -92,7 +92,7 @@ brown.edu		172800	IN	NS	bru-ns3.brown.edu
 
 ;; ADDITIONAL SECTION:
 ns1.ucsb.edu		172800	IN	A	128.111.1.1
-ns1.ucsb.edu		172800	IN	A	2607:f378::1
+ns1.ucsb.edu		172800	IN	AAAA	2607:f378::1
 bru-ns1.brown.edu		172800	IN	A	128.148.248.11
 bru-ns2.brown.edu		172800	IN	A	128.148.248.12
 bru-ns3.brown.edu		172800	IN	A	128.148.2.13
