@@ -19,17 +19,17 @@
 Without setting `-trace`, the response from **who-dis** mimicks the behavior of `dig`:
 
 ```
-$ ./who-dis www.brown.edu
-nochache = false; trace = false
-### Cached response ###
-brown.edu	128.111.1.1
+$ ./who-dis -nocache www.brown.edu
+nochache = true; trace = false
 
-### Response from 128.111.1.1 ###
+### Response from 8.8.8.8 ###
 ;; QUESTION SECTION:
 www.brown.edu			IN	A
 
 ;; ANSWER SECTION:
-www.brown.edu		3600	IN	CNAME	www.brown.edu.cdn.cloudflare.net
+www.brown.edu		2619	IN	CNAME	www.brown.edu.cdn.cloudflare.net
+www.brown.edu.cdn.cloudflare.net		300	IN	A	104.18.3.173
+www.brown.edu.cdn.cloudflare.net		300	IN	A	104.18.2.173
 
 ;; AUTHORITY SECTION:
 
